@@ -2,6 +2,12 @@ package com.example.proyecto_listado.model
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -9,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -23,8 +28,7 @@ import kotlinx.coroutines.delay
 data class Item(val file: String, val type: MediaType, val duration: Int) {
     @SuppressLint("DiscouragedApi")
     @Composable
-    fun Render(context: Context) {
-        var currentIndex by remember { mutableIntStateOf(0) }
+    fun Render(context: Context, transitionType: String) {
         when (type) {
             MediaType.IMAGE -> {
                 val resourceId = context.resources.getIdentifier(file, "raw", context.packageName)
@@ -36,21 +40,50 @@ data class Item(val file: String, val type: MediaType, val duration: Int) {
             }
 
             MediaType.VIDEO -> {
-                var isVideoReady by remember { mutableStateOf(false) }
-
-                if (isVideoReady) {
+                // No aplico cambios en estas transiciones porque ya funcionan
+                if (transitionType == "Expand and Shrink" || transitionType == "Scale") {
                     VideoPlayer(context, file)
                 } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black)
-                    ) {
-                        LaunchedEffect(currentIndex) {
+                    // Para fade y slides, usar la lógica de la pantalla negra
+                    var isVideoReady by remember { mutableStateOf(false) }
+                    var showBlackScreen by remember { mutableStateOf(true) }
+
+
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        // Pantalla negra inicial
+                        AnimatedVisibility(
+                            visible = showBlackScreen,
+                            exit = fadeOut(animationSpec = tween(durationMillis = 3000))
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black)
+                            )
+                        }
+
+                        // Video con animación
+                        AnimatedVisibility(
+                            visible = isVideoReady,
+                            enter = when (transitionType) {
+                                "Fade" -> fadeIn(animationSpec = tween(durationMillis = 3000))
+                                "Slide (Horizontally)" -> slideInHorizontally(initialOffsetX = { -1000 }, animationSpec = tween(durationMillis = 3000))
+                                "Slide (Vertically)" -> slideInVertically(initialOffsetY = { -1000 }, animationSpec = tween(durationMillis = 3000))
+                                else -> fadeIn(animationSpec = tween(durationMillis = 3000))
+                            },
+                            exit = fadeOut(animationSpec = tween(durationMillis = 3000))
+                        ) {
+                            VideoPlayer(context, file)
+                        }
+
+                        // Lógica para preparar el video
+                        LaunchedEffect(Unit) {
                             delay(1000)
+                            showBlackScreen = false
                             isVideoReady = true
                         }
                     }
+
                 }
             }
 
@@ -59,7 +92,6 @@ data class Item(val file: String, val type: MediaType, val duration: Int) {
             }
         }
     }
-
 }
 
 enum class MediaType {
@@ -70,18 +102,15 @@ enum class MediaType {
 
 object MediaData {
     val items = listOf(
-        Item("paisaje", type = MediaType.VIDEO, 7000),
         Item("gato", type = MediaType.IMAGE, 4000),
+        Item("arana", type = MediaType.IMAGE, 4000),
         Item("mar", type = MediaType.VIDEO, 7000),
         Item("https://github.com/", type = MediaType.URL, 10000),
-        Item("fuego", type = MediaType.VIDEO, 7000),
-
         Item("lago", type = MediaType.IMAGE, 4000),
-
+        Item("paisaje", type = MediaType.VIDEO, 7000),
         Item("https://orbys.eu/", type = MediaType.URL, 10000),
         Item("arana", type = MediaType.IMAGE, 4000),
+        Item("fuego", type = MediaType.VIDEO, 7000),
         Item("https://www.android.com/intl/es_es/", type = MediaType.URL, 10000)
-
-
     )
 }

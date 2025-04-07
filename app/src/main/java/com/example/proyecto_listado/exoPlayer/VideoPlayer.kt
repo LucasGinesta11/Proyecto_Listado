@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
@@ -20,6 +21,13 @@ fun VideoPlayer(context: Context, video: String) {
             setMediaItem(mediaItem)
             prepare()
             playWhenReady = true
+        }
+    }
+
+    // Liberar recursos
+    DisposableEffect(Unit) {
+        onDispose {
+            exoplayer.release()
         }
     }
 

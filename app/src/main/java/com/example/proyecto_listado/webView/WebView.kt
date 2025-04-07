@@ -126,18 +126,5 @@ fun WebViewComponent(
                 color = Color.DarkGray,
             )
         }
-
-        FloatingActionButton(
-            onClick = { (context as Activity).finish() },
-            contentColor = Color.White,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(24.dp)
-        ) {
-            Icon(
-                Icons.Filled.Close,
-                "Cerrar aplicación",
-            )
-        }
     }
 }
