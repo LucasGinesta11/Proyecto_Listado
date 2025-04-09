@@ -1,7 +1,6 @@
 package com.example.proyecto_listado.webView
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.graphics.Bitmap
 import android.view.ViewGroup
 import android.webkit.WebResourceRequest
@@ -10,29 +9,24 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 
-@SuppressLint("SetJavaScriptEnabled")
+@SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
 @Composable
 fun WebViewComponent(
     url: String
 ) {
     // Estado de carga
     val loadingState = remember { mutableStateOf(true) }
-    val context = LocalContext.current
 
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(
@@ -41,6 +35,8 @@ fun WebViewComponent(
                     with(settings) {
                         javaScriptEnabled = true
                         useWideViewPort = true
+                        // Bloque interaccion en el WebView
+                        setOnTouchListener { _, _ -> true }
                         loadWithOverviewMode = true
                         domStorageEnabled = true
                         allowFileAccess = true
